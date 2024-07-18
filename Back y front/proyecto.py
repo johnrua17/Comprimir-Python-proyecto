@@ -122,12 +122,15 @@ class TextCompressorApp:
         self.after_label = ttk.Label(self.compression_frame, text="Después de comprimir", font=("Helvetica", 12))
         self.after_label.grid(row=2, column=0)
         
-        self.after_text = ttk.Entry(self.compression_frame, font=('Helvetica', 10))
+        self.after_text = tk.Text(self.compression_frame, height=10, width=50, font=('Helvetica', 10))
         self.after_text.grid(row=3, column=0, pady=5)
         
         # File size after decompression
         self.decompressed_file_size_label = ttk.Label(self.compression_frame, text="Peso del archivo descomprimido", font=("Helvetica", 12))
-        self.decompressed_file_size_label.grid(row=4, column=0, pady=5)
+        self.decompressed_file_size_label.grid(row=5, column=0, pady=5)
+        
+        self.compressed_file_size_label = ttk.Label(self.compression_frame, text="Peso del archivo comprimido", font=("Helvetica", 12))
+        self.compressed_file_size_label.grid(row=4, column=0, pady=5)
         
         # Buttons for compression and decompression
         self.button_frame = ttk.Frame(self.root)
@@ -158,11 +161,16 @@ class TextCompressorApp:
         text = self.before_text.get(1.0, tk.END).strip()
         probabilidades_ordenadas = preparar_probabilidades(text)
         encoded_text = encode_string(text, probabilidades_ordenadas)
-        self.after_text.delete(0, tk.END)
-        self.after_text.insert(0, encoded_text)
+        self.after_text.delete(1.0, tk.END)
+        self.after_text.insert(tk.END, encoded_text)
+        
+        # Calcular el peso comprimido en bytes
+        bits_count = len(encoded_text)
+        bytes_count = (bits_count + 7) // 8  # Redondea hacia arriba
+        self.compressed_file_size_label.config(text=f"Peso del archivo comprimido: {bytes_count} bytes")
     
     def decompress_text(self):
-        encoded_text = self.after_text.get().strip()
+        encoded_text = self.after_text.get(1.0, tk.END).strip()
         probabilidades_ordenadas = preparar_probabilidades(self.before_text.get(1.0, tk.END).strip())
         decoded_text = decode_string(encoded_text, probabilidades_ordenadas)
         self.before_text.delete(1.0, tk.END)
