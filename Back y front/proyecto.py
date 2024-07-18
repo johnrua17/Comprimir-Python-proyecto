@@ -109,44 +109,62 @@ class TextCompressorApp:
         self.file_size_label = ttk.Label(self.file_frame, text="Peso del archivo", font=("Helvetica", 12))
         self.file_size_label.grid(row=1, column=1, padx=5)
         
-        # Compression section
-        self.compression_frame = ttk.Frame(self.root)
-        self.compression_frame.pack(pady=10)
+        # Horizontal compression and decompression section
+        self.horizontal_frame = ttk.Frame(self.root)
+        self.horizontal_frame.pack(pady=10)
         
-        self.before_label = ttk.Label(self.compression_frame, text="Antes de comprimir", font=("Helvetica", 12))
-        self.before_label.grid(row=0, column=0)
+        self.before_frame = ttk.Frame(self.horizontal_frame)
+        self.before_frame.grid(row=0, column=0, padx=5)
         
-        self.before_text = tk.Text(self.compression_frame, height=10, width=50, font=('Helvetica', 10))
-        self.before_text.grid(row=1, column=0, pady=5)
+        self.before_label = ttk.Label(self.before_frame, text="Antes de comprimir", font=("Helvetica", 12))
+        self.before_label.pack()
         
-        self.after_label = ttk.Label(self.compression_frame, text="Después de comprimir", font=("Helvetica", 12))
-        self.after_label.grid(row=2, column=0)
+        self.before_text = tk.Text(self.before_frame, height=20, width=40, font=('Helvetica', 10))
+        self.before_text.pack(pady=5)
         
-        self.after_text = tk.Text(self.compression_frame, height=10, width=50, font=('Helvetica', 10))
-        self.after_text.grid(row=3, column=0, pady=5)
+        self.compress_button = ttk.Button(self.before_frame, text="Comprimir", command=self.compress_text)
+        self.compress_button.pack(pady=5)
         
-        # File size after decompression
-        self.decompressed_file_size_label = ttk.Label(self.compression_frame, text="Peso del archivo descomprimido", font=("Helvetica", 12))
-        self.decompressed_file_size_label.grid(row=5, column=0, pady=5)
+        self.after_frame = ttk.Frame(self.horizontal_frame)
+        self.after_frame.grid(row=0, column=1, padx=5)
         
-        self.compressed_file_size_label = ttk.Label(self.compression_frame, text="Peso del archivo comprimido", font=("Helvetica", 12))
-        self.compressed_file_size_label.grid(row=4, column=0, pady=5)
+        self.after_label = ttk.Label(self.after_frame, text="Después de comprimir", font=("Helvetica", 12))
+        self.after_label.pack()
         
-        # Buttons for compression and decompression
-        self.button_frame = ttk.Frame(self.root)
-        self.button_frame.pack(pady=10)
+        self.after_text = tk.Text(self.after_frame, height=20, width=40, font=('Helvetica', 10))
+        self.after_text.pack(pady=5)
         
-        self.compress_button = ttk.Button(self.button_frame, text="Comprimir", command=self.compress_text)
-        self.compress_button.grid(row=0, column=0, padx=5)
+        self.decompress_button = ttk.Button(self.after_frame, text="Descomprimir", command=self.decompress_text)
+        self.decompress_button.pack(pady=5)
         
-        self.decompress_button = ttk.Button(self.button_frame, text="Descomprimir", command=self.decompress_text)
-        self.decompress_button.grid(row=0, column=1, padx=5)
+        self.decompressed_frame = ttk.Frame(self.horizontal_frame)
+        self.decompressed_frame.grid(row=0, column=2, padx=5)
+        
+        self.decompressed_label = ttk.Label(self.decompressed_frame, text="Texto descomprimido", font=("Helvetica", 12))
+        self.decompressed_label.pack()
+        
+        self.decompressed_text = tk.Text(self.decompressed_frame, height=20, width=40, font=('Helvetica', 10))
+        self.decompressed_text.pack(pady=5)
+        
+        # File size labels with scrollbars
+        self.compressed_file_size_frame = ttk.Frame(self.root)
+        self.compressed_file_size_frame.pack(pady=10, fill=tk.X, expand=True)
+        
+        self.compressed_file_size_label = ttk.Label(self.compressed_file_size_frame, text="Peso del archivo comprimido", font=("Helvetica", 12))
+        self.compressed_file_size_label.pack(side=tk.LEFT)
+        
+        self.compressed_file_size_text = tk.Text(self.compressed_file_size_frame, height=2, font=('Helvetica', 10), wrap=tk.WORD)
+        self.compressed_file_size_text.pack(side=tk.RIGHT, fill=tk.X, expand=True)
+        
+        self.decompressed_file_size_frame = ttk.Frame(self.root)
+        self.decompressed_file_size_frame.pack(pady=10, fill=tk.X, expand=True)
+        
+        self.decompressed_file_size_label = ttk.Label(self.decompressed_file_size_frame, text="Peso del archivo descomprimido", font=("Helvetica", 12))
+        self.decompressed_file_size_label.pack(side=tk.LEFT)
+        
+        self.decompressed_file_size_text = tk.Text(self.decompressed_file_size_frame, height=2, font=('Helvetica', 10), wrap=tk.WORD)
+        self.decompressed_file_size_text.pack(side=tk.RIGHT, fill=tk.X, expand=True)
     
-    def centra(self, win, ancho, alto): 
-        x = win.winfo_screenwidth() // 2 - ancho // 2 
-        y = win.winfo_screenheight() // 2 - alto // 2 
-        win.geometry(f'{ancho}x{alto}+{x}+{y}') 
-
     def browse_file(self):
         file_path = filedialog.askopenfilename()
         if file_path:
@@ -154,8 +172,9 @@ class TextCompressorApp:
             self.file_size_label.config(text=f"Peso del archivo: {file_size} bytes")
             with open(file_path, 'r') as file:
                 content = file.read()
+                content_fixed = content.replace("\n", "\\n")
                 self.before_text.delete(1.0, tk.END)
-                self.before_text.insert(tk.END, content)
+                self.before_text.insert(tk.END, content_fixed)
     
     def compress_text(self):
         text = self.before_text.get(1.0, tk.END).strip()
@@ -167,18 +186,22 @@ class TextCompressorApp:
         # Calcular el peso comprimido en bytes
         bits_count = len(encoded_text)
         bytes_count = (bits_count + 7) // 8  # Redondea hacia arriba
-        self.compressed_file_size_label.config(text=f"Peso del archivo comprimido: {bytes_count} bytes")
+        self.compressed_file_size_text.delete(1.0, tk.END)
+        self.compressed_file_size_text.insert(tk.END, f"Peso del archivo comprimido: {bytes_count} bytes")
     
     def decompress_text(self):
         encoded_text = self.after_text.get(1.0, tk.END).strip()
         probabilidades_ordenadas = preparar_probabilidades(self.before_text.get(1.0, tk.END).strip())
         decoded_text = decode_string(encoded_text, probabilidades_ordenadas)
-        self.before_text.delete(1.0, tk.END)
-        self.before_text.insert(tk.END, decoded_text)
+        self.decompressed_text.delete(1.0, tk.END)
+        self.decompressed_text.insert(tk.END, decoded_text)
+        
+        # Calcular el peso descomprimido en bytes
         decompressed_size = len(decoded_text.encode('utf-8'))
-        self.decompressed_file_size_label.config(text=f"Peso del archivo descomprimido: {decompressed_size} bytes")
+        self.decompressed_file_size_text.delete(1.0, tk.END)
+        self.decompressed_file_size_text.insert(tk.END, f"Peso del archivo descomprimido: {decompressed_size} bytes")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = TextCompressorApp(root)
-    root.mainloop()
+# Main loop
+root = tk.Tk()
+app = TextCompressorApp(root)
+root.mainloop()
